@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Eggball replay viewer</title>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { font-family: sans-serif; display: flex; flex-direction: column; padding: 6px; box-sizing: border-box; }
+  fieldset { margin: 0 0 4px 0; padding: 4px 8px; }
+  #map-canvas-holder { flex: 1; min-height: 0; }
+  #map-canvas { width: 100%; height: 100%; display: block; background: #444; border: 1px solid black; box-sizing: border-box; }
+  #time-slider { width: 50%; }
+</style>
+</head>
+<body>
+<fieldset id="load-fieldset">
+  <legend>Load a game</legend>
+  <select id="game-select"></select>
+  <button id="load-game-button">Load</button>
+  or id <input type="text" id="game-id-input" size="26"><button id="load-id-button">Load id</button>
+  or file <input type="file" id="replay-file-input" accept=".gz,.eggball-replay,.txt">
+  <span id="status-line">No game loaded.</span>
+</fieldset>
+
+<div id="map-canvas-holder"><canvas id="map-canvas"></canvas></div>
+<div id="score-line"></div>
+
+<fieldset id="controls-fieldset">
+  <legend>Controls</legend>
+  <button id="play-pause-button">Play</button>
+  <label for="speed-select">Speed:</label>
+  <select id="speed-select">
+    <option value="0.25">0.25x</option>
+    <option value="0.5">0.5x</option>
+    <option value="1" selected>1x</option>
+    <option value="2">2x</option>
+    <option value="4">4x</option>
+    <option value="8">8x</option>
+  </select>
+  <button id="back-five-button">-5 s</button>
+  <button id="forward-five-button">+5 s</button>
+  <br>
+  <input type="range" id="time-slider" min="0" max="1000" value="0">
+  <span id="time-label">0:00 / 0:00</span>
+  <br>
+  <label for="jump-time-input">Jump to (m:ss or seconds):</label>
+  <input type="text" id="jump-time-input" size="8">
+  <button id="jump-button">Jump</button>
+  <br>
+  <label for="follow-select">Follow:</label>
+  <select id="follow-select"><option value="egg">The egg</option><option value="none">Whole map</option></select>
+  <label for="zoom-select">Zoom:</label>
+  <select id="zoom-select">
+    <option value="0.5">2x in</option>
+    <option value="0.65">1.5x in</option>
+    <option value="1" selected>1x (game view)</option>
+    <option value="1.25">1.25x out</option>
+    <option value="1.5">1.5x out</option>
+    <option value="2">2x out</option>
+    <option value="2.5">2.5x out</option>
+  </select>
+  <label><input type="checkbox" id="show-names-checkbox" checked> Show names</label>
+  <label><input type="checkbox" id="show-trails-checkbox"> Show 2 s trails</label>
+  <br>
+  <button id="make-link-button">Link to this moment</button>
+  <input type="text" id="link-text-box" size="90" readonly placeholder="A link to this game, time and view shows here and is copied">
+</fieldset>
+
+<script src="viewer.js"></script>
+</body>
+</html>
