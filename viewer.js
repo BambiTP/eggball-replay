@@ -381,8 +381,8 @@ function drawScoreboard(egg) {
 function fillFollowList() {
   followSelect.innerHTML = '';
   const add = (value, text) => { const o = document.createElement('option'); o.value = value; o.textContent = text; followSelect.appendChild(o); };
-  add('egg', 'The egg');
   add('none', 'Whole map');
+  add('egg', 'The egg');
   const players = (replay.info.players || []).filter(p => p.id !== undefined);
   players.sort((a, b) => (replay.team[a.id] + a.name).localeCompare(replay.team[b.id] + b.name));
   for (const p of players) add(String(p.id), p.name + ' (' + replay.team[p.id] + ')');
