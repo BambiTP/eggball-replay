@@ -503,6 +503,8 @@ async function loadArchiveGame(id) {
   if (!response.ok) { statusLine.textContent = 'No replay with id ' + id; return; }
   const text = await new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).text();
   loadReplayText(text, id);
+  const listBox = document.getElementById('game-select');
+  if (Array.from(listBox.options).some(o => o.value === id)) listBox.value = id;
 }
 
 async function loadFile(file) {
@@ -538,10 +540,6 @@ document.getElementById('jump-button').addEventListener('click', () => {
 });
 showNamesCheckbox.addEventListener('change', draw);
 showTrailsCheckbox.addEventListener('change', draw);
-document.getElementById('load-game-button').addEventListener('click', () => {
-  const id = document.getElementById('game-select').value;
-  if (id) loadArchiveGame(id);
-});
 document.getElementById('load-id-button').addEventListener('click', () => {
   const id = document.getElementById('game-id-input').value.trim();
   if (id) loadArchiveGame(id);
@@ -561,6 +559,50 @@ document.addEventListener('keydown', event => {
   if (event.key === 'ArrowRight') seekTo(currentMs + 5000);
 });
 
+let allGames = [];          // every game the server has, newest first
+let listedGames = [];       // the games that match the Find box
+
+function gameLabel(game) {
+  const shortNames = names => names.slice(0, 3).join(', ') + (names.length > 3 ? ' +' + (names.length - 3) : '');
+  const teams = game.teams || { red: [], blue: [] };
+  const minutes = game.ms ? Math.round(game.ms / 60000) + ' min' : '';
+  return game.localDate + ' | red ' + game.score.red + ' - ' + game.score.blue + ' blue | ' + minutes + ' | ' +
+    shortNames(teams.red) + '  vs  ' + shortNames(teams.blue);
+}
+
+// fills the dropdown with the games that have every word typed in the Find box
+function showGameList(keepId) {
+  const words = document.getElementById('game-filter-input').value.toLowerCase().split(/[\s,]+/).filter(Boolean);
+  listedGames = allGames.filter(game => words.every(word => game.searchText.includes(word)));
+  const select = document.getElementById('game-select');
+  select.innerHTML = '';
+  for (const game of listedGames) {
+    const option = document.createElement('option');
+    option.value = game.id;
+    option.textContent = gameLabel(game);
+    select.appendChild(option);
+  }
+  if (keepId) select.value = keepId;
+  document.getElementById('game-count-label').textContent = listedGames.length + ' of ' + allGames.length + ' games';
+}
+
+// choosing a game loads it straight away
+document.getElementById('game-select').addEventListener('change', event => {
+  if (event.target.value) loadArchiveGame(event.target.value);
+});
+document.getElementById('game-filter-input').addEventListener('input', () => {
+  showGameList(replay ? replay.info.id : null);
+});
+function stepGame(direction) {
+  const select = document.getElementById('game-select');
+  const next = select.selectedIndex + direction;
+  if (next < 0 || next >= select.options.length) return;
+  select.selectedIndex = next;
+  loadArchiveGame(select.value);
+}
+document.getElementById('newer-game-button').addEventListener('click', () => stepGame(-1));
+document.getElementById('older-game-button').addEventListener('click', () => stepGame(1));
+
 async function fillGameList() {
   statusLine.textContent = 'Finding the replay server ...';
   try {
@@ -576,15 +618,15 @@ async function fillGameList() {
     statusLine.textContent = 'The replay server is not answering (the computer may be off). Try again later.';
     return;
   }
-  const select = document.getElementById('game-select');
-  for (const game of games) {
-    const option = document.createElement('option');
-    option.value = game.id;
-    const when = new Date(game.at).toISOString().slice(0, 16).replace('T', ' ');
-    option.textContent = when + ' | ' + game.map + ' | red ' + game.score.red + ' - ' + game.score.blue + ' blue | ' + game.players.slice(0, 4).join(', ') + ' ...';
-    select.appendChild(option);
+  allGames = games;
+  for (const game of allGames) {
+    const when = new Date(game.at);
+    game.localDate = when.toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' });
+    game.searchText = (game.localDate + ' ' + when.toISOString().slice(0, 16) + ' ' + game.map + ' ' + game.id + ' ' +
+      game.players.join(' ')).toLowerCase();
   }
-  statusLine.textContent = games.length + ' games available.';
+  showGameList();
+  statusLine.textContent = '';
   applyLinkSettings(games);
 }
 

@@ -14,9 +14,15 @@
 </head>
 <body>
 <fieldset id="load-fieldset">
-  <legend>Load a game</legend>
-  <select id="game-select"></select>
-  <button id="load-game-button">Load</button>
+  <legend>Pick a game</legend>
+  <label for="game-filter-input">Find:</label>
+  <input type="text" id="game-filter-input" size="40" placeholder="player names, a date like 2026-11-20, a map (all words must match)">
+  <span id="game-count-label"></span>
+  <button id="newer-game-button">&laquo; Newer game</button>
+  <button id="older-game-button">Older game &raquo;</button>
+  <br>
+  <select id="game-select" style="width: 100%; margin-top: 3px;"></select>
+  <br>
   or id <input type="text" id="game-id-input" size="26"><button id="load-id-button">Load id</button>
   or file <input type="file" id="replay-file-input" accept=".gz,.eggball-replay,.txt">
   <span id="status-line">No game loaded.</span>
