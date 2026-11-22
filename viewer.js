@@ -626,15 +626,11 @@ async function applyLinkSettings(games) {
   if (params.get('play') === '1') setPlaying(true);
 }
 
-// builds a link that opens this game at this moment with the same view
+// builds a link that opens this game at this moment (always on the full field view, so no follow or zoom in it)
 function linkToThisMoment() {
   const params = new URLSearchParams();
   params.set('game', replay.info.id);
   params.set('t', (currentMs / 1000).toFixed(1));
-  const chosen = followSelect.options[followSelect.selectedIndex];
-  if (followSelect.value === 'egg' || followSelect.value === 'none') params.set('follow', followSelect.value);
-  else params.set('follow', chosen.textContent.replace(/ \((red|blue)\)$/, ''));
-  params.set('zoom', zoomSelect.value);
   return location.origin + location.pathname + '?' + params.toString();
 }
 
